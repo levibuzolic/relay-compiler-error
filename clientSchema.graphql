@@ -1,0 +1,7 @@
+extend type Message {
+  pending: Boolean
+}
+
+extend enum MutationStatus {
+  PENDING
+}

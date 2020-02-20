@@ -1,0 +1,161 @@
+type Chat implements Node {
+  archived: Boolean!
+  id: ID!
+  items(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): ChatItemConnection!
+  lastMessage: Message!
+  messages(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): ChatMessageConnection!
+  resolved: Boolean!
+  respondable: Boolean!
+  subject: String!
+  unreadByCustomer: Boolean!
+}
+
+type ChatEdge {
+  cursor: String!
+  node: Chat
+}
+
+type ChatItemConnection {
+  edges: [ChatItemEdge]
+  nodes: [ChatItemUnion]
+  pageInfo: PageInfo!
+}
+
+type ChatItemEdge {
+  cursor: String!
+  node: ChatItemUnion
+}
+
+interface ChatItemInterface {
+  content: String
+  contentPreview: String
+  id: ID!
+  sentAt: DateTime!
+}
+
+union ChatItemUnion = Message
+
+type ChatMessageConnection {
+  edges: [ChatMessageEdge]
+  nodes: [Message]
+  pageInfo: PageInfo!
+  totalCount: Int!
+  unreadCount: Int!
+}
+
+type ChatMessageEdge {
+  cursor: String!
+  node: Message
+}
+
+input CreateChatInput {
+  clientMutationId: String
+  content: String
+  image: String
+}
+
+type CreateChatPayload {
+  chat: Chat
+  clientMutationId: String
+  errors: [Error!]
+  status: MutationStatus!
+}
+
+type Customer implements Node {
+  chats(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): CustomerChatConnection!
+}
+
+type CustomerChatConnection {
+  edges: [ChatEdge]
+  nodes: [Chat]
+  pageInfo: PageInfo!
+  unreadCount: Int!
+}
+
+scalar DateTime
+
+type Error {
+  field: String
+  message: String!
+}
+
+type Message implements ChatItemInterface & Node {
+  content: String
+  contentPreview: String
+  id: ID!
+  imageDeleted: Boolean!
+  imageUrl: String
+  reference: String!
+  sentAt: DateTime!
+}
+
+type Mutation {
+  sendChatMessage(input: SendChatMessageInput!): SendChatMessagePayload!
+}
+
+enum MutationStatus {
+  ERROR
+  OK
+}
+
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Query {
+  _throwError: Boolean
+  chat(id: ID): Chat
+  customer: Customer!
+  node(
+    id: ID!
+  ): Node
+  nodes(
+    ids: [ID!]!
+  ): [Node]!
+}
+
+input SendChatMessageInput {
+  chatId: ID!
+  clientMutationId: String
+  content: String
+  image: String
+  questionName: String
+  reference: String!
+}
+
+type SendChatMessagePayload {
+  chat: Chat
+  clientMutationId: String
+  errors: [Error!]
+  messagesConnection(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): ChatMessageConnection
+  newItems: [ChatItemUnion!]!
+  newMessageEdge: ChatMessageEdge
+  status: MutationStatus!
+}
